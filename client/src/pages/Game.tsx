@@ -849,6 +849,14 @@ export const Game: React.FC<GameProps> = ({ roomState, currentSocketId }) => {
           );
         })()}
 
+        {/* Fallback loading view during round transitions */}
+        {roomState.phase !== 'CHOOSING' && roomState.phase !== 'ANSWERING' && (
+          <div className="w-full flex flex-col items-center justify-center py-8 text-center animate-fade-in">
+            <div className="text-3xl animate-bounce mb-2">🎲</div>
+            <h3 className="font-display font-bold text-base text-white">Loading Round...</h3>
+          </div>
+        )}
+
         </div>
 
         {/* RIGHT COLUMN: DEDICATED LIVE CHAT & MEDIA BOX */}
