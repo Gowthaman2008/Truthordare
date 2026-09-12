@@ -119,11 +119,21 @@ export class P2PRoomManager {
 
     const peerId = this.getPeerIdForRoom(code);
 
+    const peerConfig = {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' },
+        ],
+      },
+    };
+
     return new Promise((resolve) => {
       try {
-        this.peer = new Peer(peerId, {
-          debug: 1,
-        });
+        this.peer = new Peer(peerId, peerConfig);
 
         this.peer.on('open', (id) => {
           console.log('[P2P] Host peer opened with ID:', id);
@@ -163,11 +173,21 @@ export class P2PRoomManager {
     this.isHost = false;
     const targetPeerId = this.getPeerIdForRoom(cleanCode);
 
+    const peerConfig = {
+      debug: 1,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' },
+        ],
+      },
+    };
+
     return new Promise((resolve) => {
       try {
-        this.peer = new Peer({
-          debug: 1,
-        });
+        this.peer = new Peer(peerConfig);
 
         this.peer.on('open', () => {
           console.log('[P2P] Guest peer opened, connecting to host:', targetPeerId);
@@ -366,7 +386,7 @@ export class P2PRoomManager {
       }
 
       case 'startGame': {
-        if (this.roomState.players.length >= 2) {
+        if (this.roomState.players.length >= 1) {
           this.roomState.phase = 'CHOOSING';
           this.roomState.currentRound = 1;
           const chosen = this.roomState.players[Math.floor(Math.random() * this.roomState.players.length)];

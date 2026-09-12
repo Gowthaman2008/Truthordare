@@ -30,6 +30,26 @@ class SocketService {
       transports: ['websocket', 'polling'],
     });
 
+    const origOn = this.socket.on.bind(this.socket);
+    this.socket.on = (event: any, fn: any) => {
+      if (!this.customEventHandlers.has(event)) {
+        this.customEventHandlers.set(event, new Set());
+      }
+      this.customEventHandlers.get(event)!.add(fn);
+      return origOn(event, fn);
+    };
+
+    const origOff = this.socket.off.bind(this.socket);
+    this.socket.off = (event: any, fn?: any) => {
+      if (fn) {
+        const handlers = this.customEventHandlers.get(event);
+        if (handlers) handlers.delete(fn);
+      } else {
+        this.customEventHandlers.delete(event);
+      }
+      return origOff(event, fn);
+    };
+
     this.setupListeners();
     this.setupP2PBridge();
   }
