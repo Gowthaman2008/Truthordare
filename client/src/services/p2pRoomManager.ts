@@ -43,7 +43,20 @@ export class P2PRoomManager {
   private onLiveTypingCb: ((text: string) => void) | null = null;
 
   constructor() {
-    this.localPlayerId = 'p_' + Math.random().toString(36).substring(2, 9);
+    let savedId = localStorage.getItem('td_my_player_id');
+    if (!savedId) {
+      savedId = 'p_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('td_my_player_id', savedId);
+    }
+    this.localPlayerId = savedId;
+  }
+
+  public getLocalPlayerId(): string {
+    return this.localPlayerId;
+  }
+
+  public getIsHost(): boolean {
+    return this.isHost;
   }
 
   public getPeerIdForRoom(roomCode: string): string {
@@ -72,6 +85,8 @@ export class P2PRoomManager {
   ): Promise<{ success: boolean; code?: string; state?: RoomState; error?: string }> {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.isHost = true;
+    localStorage.setItem('td_is_host', 'true');
+    localStorage.setItem('td_my_player_id', this.localPlayerId);
 
     const hostPlayer: Player = {
       id: this.localPlayerId,
@@ -171,6 +186,8 @@ export class P2PRoomManager {
   ): Promise<{ success: boolean; state?: RoomState; error?: string }> {
     const cleanCode = code.toUpperCase().trim();
     this.isHost = false;
+    localStorage.setItem('td_is_host', 'false');
+    localStorage.setItem('td_my_player_id', this.localPlayerId);
     const targetPeerId = this.getPeerIdForRoom(cleanCode);
 
     const peerConfig = {

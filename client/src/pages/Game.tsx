@@ -38,9 +38,17 @@ export const Game: React.FC<GameProps> = ({ roomState, currentSocketId }) => {
 
   const p1 = roomState.players[0];
   const p2 = roomState.players[1];
-  const isMyTurn = roomState.currentTurnPlayerId === currentSocketId;
+  const myId = currentSocketId || socketService.getMyPlayerId();
+  const isHostStored = localStorage.getItem('td_is_host') === 'true';
+  const me = roomState.players.find((p) => p.id === myId) || 
+             (isHostStored ? roomState.players.find((p) => p.isHost) : roomState.players.find((p) => !p.isHost)) || 
+             p1;
   const activePlayer = roomState.players.find((p) => p.id === roomState.currentTurnPlayerId) || p1;
-  const me = roomState.players.find((p) => p.id === currentSocketId) || p1;
+  const isMyTurn = Boolean(
+    roomState.currentTurnPlayerId === me?.id || 
+    roomState.currentTurnPlayerId === myId ||
+    (me && activePlayer && me.name === activePlayer.name)
+  );
 
   // Listen to timer ticks and warnings
   useEffect(() => {

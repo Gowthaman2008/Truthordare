@@ -19,7 +19,7 @@ import type { RoomState } from './types';
 export function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(window.location.pathname || '/');
   const [roomState, setRoomState] = useState<RoomState | null>(null);
-  const [currentSocketId, setCurrentSocketId] = useState<string>(socketService.socket.id || '');
+  const [currentSocketId, setCurrentSocketId] = useState<string>(() => socketService.getMyPlayerId());
 
   // Parse path & params on initial load
   useEffect(() => {
@@ -33,7 +33,7 @@ export function App() {
   // Listen to Socket events & room state updates
   useEffect(() => {
     const handleConnect = () => {
-      setCurrentSocketId(socketService.socket.id || '');
+      setCurrentSocketId(socketService.getMyPlayerId());
     };
 
     const handleRoomUpdated = (state: RoomState) => {

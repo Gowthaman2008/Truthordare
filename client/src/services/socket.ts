@@ -54,6 +54,15 @@ class SocketService {
     this.setupP2PBridge();
   }
 
+  public getMyPlayerId(): string {
+    if (this.socket.connected && this.socket.id) {
+      return this.socket.id;
+    }
+    const saved = localStorage.getItem('td_my_player_id');
+    if (saved) return saved;
+    return p2pRoomManager.getLocalPlayerId();
+  }
+
   private setupP2PBridge() {
     p2pRoomManager.subscribe(
       (state: RoomState) => {
