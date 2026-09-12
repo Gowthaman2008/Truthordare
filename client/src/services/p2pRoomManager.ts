@@ -428,7 +428,7 @@ export class P2PRoomManager {
 
       case 'chooseAction': {
         const choice = data.choice as 'truth' | 'dare';
-        const question = localQuestionEngine.getRandomQuestion(
+        const question = data.question || localQuestionEngine.getRandomQuestion(
           choice,
           this.roomState.settings,
           this.roomState.usedQuestionIds,
@@ -437,7 +437,9 @@ export class P2PRoomManager {
 
         this.roomState.activeChoice = choice;
         this.roomState.activeQuestion = question;
-        this.roomState.usedQuestionIds.push(question.id);
+        if (!this.roomState.usedQuestionIds.includes(question.id)) {
+          this.roomState.usedQuestionIds.push(question.id);
+        }
         this.roomState.phase = 'ANSWERING';
         this.roomState.liveTypedAnswer = '';
 
@@ -622,10 +624,42 @@ export class P2PRoomManager {
   }
 
   public chooseAction(choice: 'truth' | 'dare') {
+    const question = localQuestionEngine.getRandomQuestion(
+      choice,
+      this.roomState?.settings || {
+        mode: 'Classic',
+        difficulty: 'All',
+        timerDuration: 30,
+        maxSkips: 3,
+        maxRounds: 10,
+        categories: [],
+      },
+      this.roomState?.usedQuestionIds || [],
+      this.roomState?.customQuestions || []
+    );
+
+    if (this.roomState) {
+      this.roomState.activeChoice = choice;
+      this.roomState.activeQuestion = question;
+      this.roomState.phase = 'ANSWERING';
+      this.roomState.liveTypedAnswer = '';
+      if (!this.roomState.usedQuestionIds.includes(question.id)) {
+        this.roomState.usedQuestionIds.push(question.id);
+      }
+      const timerDur = this.roomState.settings.timerDuration;
+      if (timerDur > 0) {
+        this.roomState.timerTotal = timerDur;
+        this.roomState.timerRemaining = timerDur;
+      }
+      if (this.onStateChangeCb) {
+        this.onStateChangeCb({ ...this.roomState });
+      }
+    }
+
     if (this.isHost) {
-      this.handleHostAction('chooseAction', { choice });
+      this.handleHostAction('chooseAction', { choice, question });
     } else {
-      this.sendToHost('chooseAction', { choice });
+      this.sendToHost('chooseAction', { choice, question });
     }
   }
 

@@ -572,44 +572,54 @@ export const Game: React.FC<GameProps> = ({ roomState, currentSocketId }) => {
           )}
 
           {/* PHASE 2: ANSWERING ACTIVE QUESTION */}
-          {roomState.phase === 'ANSWERING' && roomState.activeQuestion && (
-            <div className="w-full flex flex-col items-center animate-fade-in py-1 sm:py-2">
-              
-              <div className={`w-full p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border relative text-center mb-3 sm:mb-5 transition-all ${
-                roomState.activeChoice === 'truth' 
-                  ? 'border-neon-purple/50 shadow-glow-purple' 
-                  : 'border-neon-cyan/50 shadow-glow-cyan'
-              }`}>
+          {roomState.phase === 'ANSWERING' && (() => {
+            const activeQ = roomState.activeQuestion || {
+              id: 'fallback_q_' + Date.now(),
+              type: roomState.activeChoice || 'truth',
+              category: 'Flirty & Cute',
+              difficulty: 'Normal',
+              text: roomState.activeChoice === 'truth'
+                ? 'What was the first thing that attracted you to me?'
+                : 'Send a cute 5-second voice note saying something sweet!'
+            };
+            return (
+              <div className="w-full flex flex-col items-center animate-fade-in py-1 sm:py-2">
                 
-                {/* Question Badges */}
-                <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 mb-2.5 sm:mb-4">
-                  <span className={`px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider border ${
-                    roomState.activeChoice === 'truth'
-                      ? 'bg-neon-purple/20 text-neon-purple border-neon-purple/40'
-                      : 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/40'
-                  }`}>
-                    {roomState.activeChoice === 'truth' ? '💬 TRUTH' : '🔥 DARE'}
-                  </span>
-
-                  <span className="px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-bold text-slate-300">
-                    {roomState.activeQuestion.category}
-                  </span>
-
-                  <span className="px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-bold text-amber-400">
-                    {roomState.activeQuestion.difficulty}
-                  </span>
-
-                  {roomState.activeQuestion.isCustom && (
-                    <span className="px-2 py-0.5 rounded-full bg-neon-pink/20 text-neon-pink border border-neon-pink/30 text-[10px] font-black uppercase">
-                      Custom
+                <div className={`w-full p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl glass-card border relative text-center mb-3 sm:mb-5 transition-all ${
+                  (roomState.activeChoice || activeQ.type) === 'truth' 
+                    ? 'border-neon-purple/50 shadow-glow-purple' 
+                    : 'border-neon-cyan/50 shadow-glow-cyan'
+                }`}>
+                  
+                  {/* Question Badges */}
+                  <div className="flex items-center justify-center flex-wrap gap-1.5 sm:gap-2 mb-2.5 sm:mb-4">
+                    <span className={`px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider border ${
+                      (roomState.activeChoice || activeQ.type) === 'truth'
+                        ? 'bg-neon-purple/20 text-neon-purple border-neon-purple/40'
+                        : 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/40'
+                    }`}>
+                      {(roomState.activeChoice || activeQ.type) === 'truth' ? '💬 TRUTH' : '🔥 DARE'}
                     </span>
-                  )}
-                </div>
 
-                {/* Question Text */}
-                <h3 className="font-display font-extrabold text-base sm:text-2xl text-white leading-snug mb-3 sm:mb-5">
-                  "{roomState.activeQuestion.text}"
-                </h3>
+                    <span className="px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-bold text-slate-300">
+                      {activeQ.category}
+                    </span>
+
+                    <span className="px-2.5 py-0.5 sm:py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-bold text-amber-400">
+                      {activeQ.difficulty}
+                    </span>
+
+                    {activeQ.isCustom && (
+                      <span className="px-2 py-0.5 rounded-full bg-neon-pink/20 text-neon-pink border border-neon-pink/30 text-[10px] font-black uppercase">
+                        Custom
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Question Text */}
+                  <h3 className="font-display font-extrabold text-base sm:text-2xl text-white leading-snug mb-3 sm:mb-5">
+                    "{activeQ.text}"
+                  </h3>
 
                 {/* Timer Circle */}
                 {roomState.settings.timerDuration > 0 && (
@@ -836,7 +846,8 @@ export const Game: React.FC<GameProps> = ({ roomState, currentSocketId }) => {
               )}
 
             </div>
-          )}
+          );
+        })()}
 
         </div>
 
