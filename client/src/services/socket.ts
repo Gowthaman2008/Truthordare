@@ -276,36 +276,33 @@ class SocketService {
   }
 
   public toggleReady(code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.toggleReady();
-    } else {
+    p2pRoomManager.toggleReady();
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('toggleReady', { code: code || session?.code });
     }
   }
 
   public updateSettings(settings: Partial<GameSettings>, code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.updateSettings(settings);
-    } else {
+    p2pRoomManager.updateSettings(settings);
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('updateSettings', { ...settings, code: code || session?.code });
     }
   }
 
   public addCustomQuestion(question: { type: 'truth' | 'dare'; category: string; difficulty: Difficulty; text: string }, code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.addCustomQuestion(question.text, question.type);
-    } else {
+    p2pRoomManager.addCustomQuestion(question.text, question.type);
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('addCustomQuestion', { ...question, code: code || session?.code });
     }
   }
 
   public startGame(code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.startGame();
-    } else {
+    console.log('[SocketService] Starting game now (P2P + Socket)...');
+    p2pRoomManager.startGame();
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       const roomCode = code || session?.code;
       console.log('[SocketService] Emitting startGame with code:', roomCode);
@@ -314,28 +311,25 @@ class SocketService {
   }
 
   public chooseType(choice: 'truth' | 'dare', code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.chooseAction(choice);
-    } else {
+    p2pRoomManager.chooseAction(choice);
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('chooseType', { choice, code: code || session?.code });
     }
   }
 
   public typeAnswer(text: string, code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.liveTyping(text);
-    } else {
+    p2pRoomManager.liveTyping(text);
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('typeAnswer', { text, code: code || session?.code });
     }
   }
 
   public completeQuestion(data?: { answerText?: string; mediaUrl?: string; mediaType?: 'image' | 'video' | 'voice'; mediaDuration?: number } | string, code?: string) {
-    if (this.isP2PMode) {
-      const text = typeof data === 'string' ? data : data?.answerText;
-      p2pRoomManager.submitAnswer(text);
-    } else {
+    const text = typeof data === 'string' ? data : data?.answerText;
+    p2pRoomManager.submitAnswer(text);
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       const roomCode = code || session?.code;
       if (typeof data === 'string') {
@@ -347,9 +341,8 @@ class SocketService {
   }
 
   public skipQuestion(code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.skipQuestion();
-    } else {
+    p2pRoomManager.skipQuestion();
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('skipQuestion', { code: code || session?.code });
     }
@@ -362,13 +355,12 @@ class SocketService {
     mediaDuration?: number;
     replyTo?: { id: string; senderName: string; text: string };
   } | string, code?: string) {
-    if (this.isP2PMode) {
-      if (typeof data === 'string') {
-        p2pRoomManager.sendChatMessage({ text: data, type: 'text' });
-      } else {
-        p2pRoomManager.sendChatMessage(data);
-      }
+    if (typeof data === 'string') {
+      p2pRoomManager.sendChatMessage({ text: data, type: 'text' });
     } else {
+      p2pRoomManager.sendChatMessage(data);
+    }
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       const roomCode = code || session?.code;
       if (typeof data === 'string') {
@@ -380,27 +372,24 @@ class SocketService {
   }
 
   public sendReaction(emoji: string, code?: string) {
-    if (this.isP2PMode) {
-      this.triggerLocalEvent('reactionReceived', { emoji, id: 'rx_' + Date.now() });
-    } else {
+    this.triggerLocalEvent('reactionReceived', { emoji, id: 'rx_' + Date.now() });
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('sendReaction', { emoji, code: code || session?.code });
     }
   }
 
   public playAgain(code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.restartGame();
-    } else {
+    p2pRoomManager.restartGame();
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('playAgain', { code: code || session?.code });
     }
   }
 
   public resetToLobby(code?: string) {
-    if (this.isP2PMode) {
-      p2pRoomManager.leaveRoom();
-    } else {
+    p2pRoomManager.leaveRoom();
+    if (this.socket.connected) {
       const session = this.getSavedSession();
       this.socket.emit('resetToLobby', { code: code || session?.code });
     }
